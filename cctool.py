@@ -276,6 +276,9 @@ if __name__ == '__main__':
 		print("Missing output format")
 		sys.exit(1)
 
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
+
 	infile = sys.stdin if args.input is None else open(args.input)
 	outfile = sys.stdout if args.output is None else open(args.output)
 
