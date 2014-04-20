@@ -28,8 +28,6 @@
 # -	merge
 # -	sort
 # -	filter
-# -	unicode
-# -	error handling
 
 import os
 import sys
