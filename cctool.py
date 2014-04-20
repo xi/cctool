@@ -125,6 +125,14 @@ class BSDCal(Format):
 
 
 class ICal(Format):
+	fields = ['attach', 'categories', 'class', 'comment', 'description', 'geo',
+		'location', 'percent-complete', 'priority', 'resources', 'status',
+		'summary', 'completed', 'dtend', 'due', 'dtstart', 'duration', 'freebusy',
+		'transp', 'tzid', 'tzname', 'tzoffsetfrom', 'tzoffsetto', 'tzurl',
+		'attendee', 'contact', 'organizer', 'recurrence-id', 'related-to', 'url',
+		'uid', 'exdate', 'rdate', 'rrule', 'action', 'repeat', 'trigger',
+		'created', 'dtstamp', 'last-modified', 'sequence']
+
 	@classmethod
 	def load(cls, fh):
 		if isinstance(vobject, Exception):
@@ -146,7 +154,9 @@ class ICal(Format):
 		for event in data:
 			vevent = ical.add('vevent')
 			for key in event:
-				vevent.add(key).value = event.join(key)
+				if key in cls.fields:
+					for value in event[key]:
+						vevent.add(key).value = value
 		ical.serialize(fh)
 
 
@@ -231,6 +241,12 @@ class LDIF(Format):
 
 
 class VCard(Format):
+	fields = ['fn', 'n', 'nickname', 'photo', 'bday', 'anniversary', 'gender',
+		'adr', 'tel', 'email', 'impp', 'lang', 'tz', 'geo', 'title', 'role',
+		'logo', 'org', 'member', 'related', 'categories', 'note', 'prodid', 'rev',
+		'sound', 'uid', 'clientpidmap', 'url', 'version', 'key', 'fburl',
+		'caladruri', 'caluri']
+
 	@classmethod
 	def load(cls, fh):
 		if isinstance(vobject, Exception):
@@ -249,8 +265,16 @@ class VCard(Format):
 
 		for item in data:
 			vcard = vobject.vCard()
+			vcard.add('n').value = ''
 			for key in item:
-				vcard.add(key).value = item.join(key)
+				if key == 'name':
+					vcard.add('fn').value = item.join(key)
+				elif key == 'nick':
+					for value in item[key]:
+						vcard.add('nickname').value = value
+				elif key in cls.fields:
+					for value in item[key]:
+						vcard.add(key).value = value
 			vcard.serialize(fh)
 
 
