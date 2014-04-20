@@ -321,10 +321,12 @@ if __name__ == '__main__':
 		informats['ldif'] = LDIF
 
 	parser = argparse.ArgumentParser(description=__doc__)
-	parser.add_argument('--from', '-f', choices=informats.keys(), dest='informat')
-	parser.add_argument('--to', '-t', choices=outformats.keys(), dest='outformat')
-	parser.add_argument('input', nargs='?')
-	parser.add_argument('--output', '-o')
+	parser.add_argument('--from', '-f', choices=informats.keys(),
+		metavar='FORMAT', dest='informat')
+	parser.add_argument('--to', '-t', choices=outformats.keys(),
+		metavar='FORMAT', dest='outformat')
+	parser.add_argument('input', nargs='?', metavar='FILE')
+	parser.add_argument('--output', '-o', metavar='FILENAME')
 	parser.add_argument('--sort', '-s', metavar='SORTKEY',
 		help="sort entries by this field")
 	args = parser.parse_args()
