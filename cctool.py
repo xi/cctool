@@ -169,7 +169,12 @@ class ABook(Format):
 			section = unicode(i)
 			cp.add_section(section)
 			for key in item:
-				cp.set(section, key, item.join(key))
+				if key in cls.fields:
+					cp.set(section, key, item.join(key))
+				elif key in ['mail']:
+					cp.set(section, 'email', item.join(key))
+				elif key in ['cn']:
+					cp.set(section, 'name', item.join(key))
 			i += 1
 		cp.write(fh)
 
