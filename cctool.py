@@ -156,7 +156,7 @@ class ABook(Format):
 		cp.readfp(fh)
 		for section in cp.sections():
 			if section != u'format':
-				yield MultiDict({k: [v] for (k, v) in cp.items(section)})
+				yield MultiDict({k: v.split(',') for (k, v) in cp.items(section)})
 
 	@classmethod
 	def dump(cls, data, fh):
