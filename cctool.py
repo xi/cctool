@@ -91,6 +91,8 @@ class MultiDict(dict):
 
 
 class Format(object):
+	"""Baseclass with an API similar to the marshal, pickle and json modules."""
+
 	@classmethod
 	def load(cls, fh):
 		raise NotImplementedError
