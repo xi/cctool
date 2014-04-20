@@ -38,7 +38,6 @@ import logging as log
 from StringIO import StringIO
 from ConfigParser import SafeConfigParser as ConfigParser
 import json
-from pprint import pprint
 
 try:
 	import ldif
@@ -187,12 +186,6 @@ class JSON(Format):
 		json.dump(list(data), fh, indent=4)
 
 
-class PPrint(Format):
-	@classmethod
-	def dump(cls, data, fh):
-		pprint(list(data), fh)
-
-
 if __name__ == '__main__':
 	informats = {
 		'abook': ABook,
@@ -202,7 +195,6 @@ if __name__ == '__main__':
 		'bsdcal': BSDCal,
 		'abook': ABook,
 		'json': JSON,
-		'pprint': PPrint,
 	}
 	if not isinstance(vobject, Exception):
 		informats['ics'] = ICal
