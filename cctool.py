@@ -148,7 +148,10 @@ class ICal(Format):
 
 
 class ABook(Format):
-	# TODO read abookrc and convert fields
+	fields = ['name', 'nick', 'bday', 'email', 'url', 'tag',
+		'address_lines', 'city', 'state', 'zip', 'country',
+		'phone', 'workphone', 'mobile',
+		'xmpp', 'icq', 'msn', 'twitter', 'pgp']
 
 	@classmethod
 	def load(cls, fh):
@@ -181,6 +184,9 @@ class LDIFParser(ldif.LDIFParser):
 
 
 class LDIF(Format):
+	fields = ['dn', 'objeclass', 'modifytimestamp',
+		'mail', 'givenName', 'sn', 'cn']
+
 	@classmethod
 	def load(cls, fh):
 		if isinstance(ldif, Exception):
