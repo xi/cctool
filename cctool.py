@@ -117,11 +117,12 @@ class BSDCal(Format):
 	def dump(cls, data, fh):
 		for item in data:
 			if u'dtstart' in item and u'summary' in item:
-				dt = item.first('dtstart').strftime('%m/%d')
-				fh.write('%s\t%s\n' % (dt, item.join('summary')))
+				dt = item.first('dtstart')
+				if dt.year == datetime.today().year:
+					fh.write('%s\t%s\n' % (dt.strftime('%m/%d'), item.join('summary')))
 			if u'bday' in item and u'name' in item:
-				dt = item.first('bday').strftime('%m/%d*')
-				fh.write('%s\t%s\n' % (dt, item.join('name')))
+				dt = item.first('bday')
+				fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('name')))
 
 
 class ICal(Format):
