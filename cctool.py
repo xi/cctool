@@ -26,7 +26,6 @@
 # -	doc
 # -	tests
 # -	merge
-# -	sort
 # -	filter
 
 import os
@@ -57,6 +56,8 @@ class MultiDict(OrderedDict):
 	"""Dict subclass with multiple values for each key.
 
 	>>> d = MultiDict()
+	>>> d['foo']
+	[]
 	>>> d['foo'] = []
 	>>> 'foo' in d
 	False
@@ -70,7 +71,14 @@ class MultiDict(OrderedDict):
 	"""
 
 	def __contains__(self, key):
-		return super(MultiDict, self).__contains__(key) and self[key] != []
+		return (super(MultiDict, self).__contains__(key)
+			and super(MultiDict, self).__getitem__(key) != [])
+
+	def __getitem__(self, key):
+		if key in self:
+			return super(MultiDict, self).__getitem__(key)
+		else:
+			return []
 
 	def first(self, key, default=NOTSET):
 		if key in self:
@@ -80,15 +88,11 @@ class MultiDict(OrderedDict):
 		else:
 			raise KeyError
 
-	def join(self, key, default=NOTSET, sep=u','):
+	def join(self, key, default='', sep=u','):
 		if key in self and len(self[key]) == 1:
 			return self[key][0]
-		elif key in self:
-			return sep.join(self[key])
-		elif default is not NOTSET:
-			return default
 		else:
-			raise KeyError
+			return sep.join(self[key])
 
 
 class Format(object):
@@ -321,6 +325,8 @@ if __name__ == '__main__':
 	parser.add_argument('--to', '-t', choices=outformats.keys(), dest='outformat')
 	parser.add_argument('input', nargs='?')
 	parser.add_argument('--output', '-o')
+	parser.add_argument('--sort', '-s', metavar='SORTKEY',
+		help="sort entries by this field")
 	args = parser.parse_args()
 
 	if args.informat is None and args.input is not None:
@@ -350,6 +356,10 @@ if __name__ == '__main__':
 	except Exception as e:
 		log.error(e)
 		sys.exit(1)
+
+	if args.sort is not None:
+		data = sorted(data, key=lambda x: x[args.sort])
+
 	try:
 		outformats[args.outformat]().dump(data, outfile)
 	except Exception as e:
