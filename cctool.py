@@ -75,7 +75,7 @@ class MultiDict(dict):
 	def first(self, key, default=NOTSET):
 		if key in self:
 			return self[key][0]
-		elif default is not NOTSET :
+		elif default is not NOTSET:
 			return default
 		else:
 			raise KeyError
@@ -85,7 +85,7 @@ class MultiDict(dict):
 			return self[key][0]
 		elif key in self:
 			return sep.join(self[key])
-		elif default is not NOTSET :
+		elif default is not NOTSET:
 			return default
 		else:
 			raise KeyError
