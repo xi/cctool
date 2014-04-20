@@ -25,7 +25,6 @@
 # -	filter/convert for valid fields
 # -	doc
 # -	tests
-# -	multidicts
 # -	merge
 # -	sort
 # -	filter
@@ -48,6 +47,47 @@ try:
 	import vobject
 except ImportError as e:
 	vobject = e
+
+
+NOTSET = object()
+
+
+class MultiDict(dict):
+	"""Dict subclass with multiple values for each key.
+
+	>>> d = MultiDict()
+	>>> d['foo'] = []
+	>>> 'foo' in d
+	False
+	>>> d['foo'] = [1, 2, 3]
+	>>> 'foo' in d
+	True
+	>>> d['foo']
+	[1, 2, 3]
+	>>> d.first('foo')
+	1
+	"""
+
+	def __contains__(self, key):
+		return super(MultiDict, self).__contains__(key) and self[key] != []
+
+	def first(self, key, default=NOTSET):
+		if key in self:
+			return self[key][0]
+		elif default is not NOTSET :
+			return default
+		else:
+			raise KeyError
+
+	def join(self, key, default=NOTSET, sep=u','):
+		if key in self and len(self[key]) == 1:
+			return self[key][0]
+		elif key in self:
+			return sep.join(self[key])
+		elif default is not NOTSET :
+			return default
+		else:
+			raise KeyError
 
 
 class Format(object):
@@ -75,9 +115,9 @@ class BSDCal(Format):
 	def dump(cls, data, fh):
 		for item in data:
 			if u'dtstart' in item and u'summary' in item:
-				fh.write('%s\t%s\n' % (item['dtstart'], item['summary']))
+				fh.write('%s\t%s\n' % (item.first('dtstart'), item.join('summary')))
 			if u'bday' in item and u'name' in item:
-				fh.write('%s\t%s\n' % (item['bday'], item['name']))
+				fh.write('%s\t%s\n' % (item.first('bday'), item.join('name')))
 
 
 class ICal(Format):
@@ -88,7 +128,10 @@ class ICal(Format):
 
 		for calendar in vobject.readComponents(fh):
 			for event in calendar.vevent_list:
-				yield {k: v[0].value for (k, v) in event.contents.iteritems()}
+				d = MultiDict()
+				for key, value in event.contents.iteritems():
+					d[key] = [i.value for i in value]
+				yield d
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -98,8 +141,8 @@ class ICal(Format):
 		ical = vobject.iCalendar()
 		for event in data:
 			vevent = ical.add('vevent')
-			for key, value in event.iteritems():
-				vevent.add(key).value = value
+			for key in event:
+				vevent.add(key).value = event.join(key)
 		ical.serialize(fh)
 
 
@@ -112,7 +155,7 @@ class ABook(Format):
 		cp.readfp(fh)
 		for section in cp.sections():
 			if section != u'format':
-				yield dict(cp.items(section))
+				yield MultiDict({k: [v] for (k, v) in cp.items(section)})
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -121,8 +164,8 @@ class ABook(Format):
 		for item in data:
 			section = unicode(i)
 			cp.add_section(section)
-			for key, value in item.iteritems():
-				cp.set(section, key, unicode(value))
+			for key in item:
+				cp.set(section, key, item.join(key))
 			i += 1
 		cp.write(fh)
 
@@ -146,7 +189,8 @@ class LDIF(Format):
 			parser.parse()
 		except ValueError:
 			log.warning("ValueError after reading %i records" % parser.records_read)
-		return parser.entries.itervalues()
+		for entry in parser.entries.itervalues():
+			yield MultiDict(entry)
 
 	@classmethod
 	def dump(cls, fh):
@@ -162,7 +206,10 @@ class VCard(Format):
 			raise vobject
 
 		for vcard in vobject.readComponents(fh):
-			yield {k: v[0].value for (k, v) in vcard.contents.iteritems()}
+			d = MultiDict()
+			for key, value in vcard.contents.iteritems():
+				d[key] = [i.value for i in value]
+			yield d
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -171,15 +218,15 @@ class VCard(Format):
 
 		for item in data:
 			vcard = vobject.vCard()
-			for key, value in item.iteritems():
-				vcard.add(key).value = value
+			for key in item:
+				vcard.add(key).value = item.join(key)
 			vcard.serialize(fh)
 
 
 class JSON(Format):
 	@classmethod
 	def load(cls, fh):
-		return json.load(fh)
+		return [MultiDict(i) for i in json.load(fh)]
 
 	@classmethod
 	def dump(cls, data, fh):
