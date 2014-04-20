@@ -26,7 +26,6 @@
 # -	doc
 # -	tests
 # -	multidicts
-# -	logging
 # -	merge
 # -	sort
 # -	filter
@@ -35,6 +34,7 @@
 import os
 import sys
 import argparse
+import logging as log
 from StringIO import StringIO
 from ConfigParser import SafeConfigParser as ConfigParser
 import json
@@ -146,7 +146,7 @@ class LDIF(Format):
 		try:
 			parser.parse()
 		except ValueError:
-			print "warning: ValueError after reading %i records" % parser.records_read
+			log.warning("ValueError after reading %i records" % parser.records_read)
 		return parser.entries.itervalues()
 
 	@classmethod
