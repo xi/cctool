@@ -33,6 +33,7 @@ import os
 import sys
 import argparse
 import logging as log
+from collections import OrderedDict
 from StringIO import StringIO
 from ConfigParser import RawConfigParser as ConfigParser
 import json
@@ -52,7 +53,7 @@ except ImportError as e:
 NOTSET = object()
 
 
-class MultiDict(dict):
+class MultiDict(OrderedDict):
 	"""Dict subclass with multiple values for each key.
 
 	>>> d = MultiDict()
