@@ -29,6 +29,7 @@
 # -	sort
 # -	filter
 # -	unicode
+# -	error handling
 
 import os
 import sys
@@ -187,8 +188,9 @@ class LDIF(Format):
 		parser = LDIFParser(fh)
 		try:
 			parser.parse()
-		except ValueError:
-			log.warning("ValueError after reading %i records" % parser.records_read)
+		except ValueError as e:
+			log.warning("ValueError after reading %i records: %s"
+				% (parser.records_read, e))
 		for entry in parser.entries.itervalues():
 			yield MultiDict(entry)
 
