@@ -343,5 +343,13 @@ if __name__ == '__main__':
 	infile = sys.stdin if args.input is None else open(args.input)
 	outfile = sys.stdout if args.output is None else open(args.output)
 
-	data = informats[args.informat]().load(infile)
-	outformats[args.outformat]().dump(data, outfile)
+	try:
+		data = informats[args.informat]().load(infile)
+	except Exception as e:
+		log.error(e)
+		sys.exit(1)
+	try:
+		outformats[args.outformat]().dump(data, outfile)
+	except Exception as e:
+		log.error(e)
+		sys.exit(1)
