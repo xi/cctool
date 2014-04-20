@@ -38,6 +38,7 @@ import logging as log
 from StringIO import StringIO
 from ConfigParser import RawConfigParser as ConfigParser
 import json
+from datetime import datetime
 
 try:
 	import ldif
@@ -116,9 +117,11 @@ class BSDCal(Format):
 	def dump(cls, data, fh):
 		for item in data:
 			if u'dtstart' in item and u'summary' in item:
-				fh.write('%s\t%s\n' % (item.first('dtstart'), item.join('summary')))
+				dt = item.first('dtstart').strftime('%m/%d')
+				fh.write('%s\t%s\n' % (dt, item.join('summary')))
 			if u'bday' in item and u'name' in item:
-				fh.write('%s\t%s\n' % (item.first('bday'), item.join('name')))
+				dt = item.first('bday').strftime('%m/%d*')
+				fh.write('%s\t%s\n' % (dt, item.join('name')))
 
 
 class ICal(Format):
@@ -159,7 +162,15 @@ class ABook(Format):
 		cp.readfp(fh)
 		for section in cp.sections():
 			if section != u'format':
-				yield MultiDict({k: v.split(',') for (k, v) in cp.items(section)})
+				d = MultiDict()
+				for key, value in cp.items(section):
+					if key == 'bday':
+						if value[0] == '-':
+							value = '1900' + value[1:]
+						d[key] = [datetime.strptime(value, '%Y-%m-%d')]
+					else:
+						d[key] = value.split(u',')
+				yield d
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -169,7 +180,14 @@ class ABook(Format):
 			section = unicode(i)
 			cp.add_section(section)
 			for key in item:
-				if key in cls.fields:
+				if key == 'bday':
+					dt = item.first(key)
+					if dt.year == 1900:
+						value = dt.strftime('--%m-%d')
+					else:
+						value = dt.strftime('%Y-%m-%d')
+					cp.set(section, key, value)
+				elif key in cls.fields:
 					cp.set(section, key, item.join(key))
 				elif key in ['mail']:
 					cp.set(section, 'email', item.join(key))
@@ -236,6 +254,14 @@ class VCard(Format):
 			vcard.serialize(fh)
 
 
+class DateTimeJSONEncoder(json.JSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, datetime):
+			return obj.isoformat()
+		else:
+			return super(DateTimeJSONEncoder, self).default(obj)
+
+
 class JSON(Format):
 	@classmethod
 	def load(cls, fh):
@@ -243,7 +269,7 @@ class JSON(Format):
 
 	@classmethod
 	def dump(cls, data, fh):
-		json.dump(list(data), fh, indent=4)
+		json.dump(list(data), fh, indent=4, cls=DateTimeJSONEncoder)
 
 
 if __name__ == '__main__':
