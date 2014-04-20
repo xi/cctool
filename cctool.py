@@ -36,7 +36,7 @@ import sys
 import argparse
 import logging as log
 from StringIO import StringIO
-from ConfigParser import SafeConfigParser as ConfigParser
+from ConfigParser import RawConfigParser as ConfigParser
 import json
 
 try:
