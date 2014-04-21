@@ -50,6 +50,26 @@ except ImportError as e:
 NOTSET = object()
 
 
+def formats():
+	informats = {
+		'abook': ABook,
+		'json': JSON,
+	}
+	outformats = {
+		'bsdcal': BSDCal,
+		'abook': ABook,
+		'json': JSON,
+	}
+	if not isinstance(vobject, Exception):
+		informats['ics'] = ICal
+		outformats['ics'] = ICal
+		informats['vcf'] = VCard
+		outformats['vcf'] = VCard
+	if not isinstance(ldif, Exception):
+		informats['ldif'] = LDIF
+	return informats, outformats
+
+
 class MultiDict(OrderedDict):
 	"""Dict subclass with multiple values for each key.
 
@@ -320,22 +340,7 @@ class JSON(Format):
 
 
 if __name__ == '__main__':
-	informats = {
-		'abook': ABook,
-		'json': JSON,
-	}
-	outformats = {
-		'bsdcal': BSDCal,
-		'abook': ABook,
-		'json': JSON,
-	}
-	if not isinstance(vobject, Exception):
-		informats['ics'] = ICal
-		outformats['ics'] = ICal
-		informats['vcf'] = VCard
-		outformats['vcf'] = VCard
-	if not isinstance(ldif, Exception):
-		informats['ldif'] = LDIF
+	informats, outformats = formats()
 
 	parser = argparse.ArgumentParser(description=__doc__)
 	parser.add_argument('--from', '-f', choices=informats.keys(),
