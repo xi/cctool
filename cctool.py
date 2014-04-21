@@ -361,8 +361,6 @@ if __name__ == '__main__':
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 
-	outfile = sys.stdout if args.output is None else open(args.output)
-
 	data = []
 	for fn in args.input:
 		ext = fn.split(os.path.extsep)[-1]
@@ -380,6 +378,8 @@ if __name__ == '__main__':
 		except Exception as e:
 			log.error(e)
 			sys.exit(1)
+		if fn != '-':
+			infile.close()
 
 	if args.merge is not None:
 		data = merged(data, key=args.merge)
@@ -387,6 +387,7 @@ if __name__ == '__main__':
 	if args.sort is not None:
 		data = sorted(data, key=lambda x: x[args.sort])
 
+	outfile = sys.stdout if args.output is None else open(args.output)
 	try:
 		outformats[args.outformat]().dump(data, outfile)
 	except Exception as e:
