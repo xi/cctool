@@ -24,7 +24,6 @@
 # -	type conversion (especially dates)
 # -	filter/convert for valid fields
 # -	tests
-# -	merge
 # -	filter
 
 import os
@@ -92,6 +91,25 @@ class MultiDict(OrderedDict):
 			return self[key][0]
 		else:
 			return sep.join(self[key])
+
+	def update(self, other):
+		for key in other:
+			self[key] = list(set(self[key] + other[key]))
+
+
+def merged(data, key):
+	tmp = dict()
+	missing = []
+	for entry in data:
+		if key in entry:
+			tmp_key = str(entry[key])
+			if tmp_key in tmp:
+				tmp[tmp_key].update(entry)
+			else:
+				tmp[tmp_key] = entry
+		else:
+			missing.append(entry)
+	return tmp.values() + missing
 
 
 class Format(object):
@@ -328,6 +346,8 @@ if __name__ == '__main__':
 	parser.add_argument('--output', '-o', metavar='FILENAME')
 	parser.add_argument('--sort', '-s', metavar='SORTKEY',
 		help="sort entries by this field")
+	parser.add_argument('--merge', '-m', metavar='MERGEKEY',
+		help="merge entries by this field")
 	args = parser.parse_args()
 
 	if args.outformat is None and args.output is not None:
@@ -360,6 +380,9 @@ if __name__ == '__main__':
 		except Exception as e:
 			log.error(e)
 			sys.exit(1)
+
+	if args.merge is not None:
+		data = merged(data, key=args.merge)
 
 	if args.sort is not None:
 		data = sorted(data, key=lambda x: x[args.sort])
