@@ -23,7 +23,6 @@
 # TODO
 # -	type conversion (especially dates)
 # -	filter/convert for valid fields
-# -	doc
 # -	tests
 # -	merge
 # -	filter
@@ -325,19 +324,11 @@ if __name__ == '__main__':
 		metavar='FORMAT', dest='informat')
 	parser.add_argument('--to', '-t', choices=outformats.keys(),
 		metavar='FORMAT', dest='outformat')
-	parser.add_argument('input', nargs='?', metavar='FILE')
+	parser.add_argument('input', nargs='*', default=['-'], metavar='FILE')
 	parser.add_argument('--output', '-o', metavar='FILENAME')
 	parser.add_argument('--sort', '-s', metavar='SORTKEY',
 		help="sort entries by this field")
 	args = parser.parse_args()
-
-	if args.informat is None and args.input is not None:
-		ext = args.input.split(os.path.extsep)[-1]
-		if ext in informats:
-			args.informat = ext
-	if args.informat is None:
-		print("Missing input format")
-		sys.exit(1)
 
 	if args.outformat is None and args.output is not None:
 		ext = args.output.split(os.path.extsep)[-1]
@@ -350,14 +341,25 @@ if __name__ == '__main__':
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 
-	infile = sys.stdin if args.input is None else open(args.input)
 	outfile = sys.stdout if args.output is None else open(args.output)
 
-	try:
-		data = informats[args.informat]().load(infile)
-	except Exception as e:
-		log.error(e)
-		sys.exit(1)
+	data = []
+	for fn in args.input:
+		ext = fn.split(os.path.extsep)[-1]
+		if args.informat is not None:
+			informat = args.informat
+		elif ext in informats:
+			informat = ext
+		else:
+			print("Missing input format")
+			sys.exit(1)
+
+		infile = sys.stdin if fn == '-' else open(fn)
+		try:
+			data += informats[informat]().load(infile)
+		except Exception as e:
+			log.error(e)
+			sys.exit(1)
 
 	if args.sort is not None:
 		data = sorted(data, key=lambda x: x[args.sort])
