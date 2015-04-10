@@ -339,7 +339,7 @@ class JSON(Format):
 		json.dump(list(data), fh, indent=4, cls=DateTimeJSONEncoder)
 
 
-if __name__ == '__main__':
+def parse_args(argv=None):
 	informats, outformats = formats()
 
 	parser = argparse.ArgumentParser(description=__doc__)
@@ -353,7 +353,13 @@ if __name__ == '__main__':
 		help="sort entries by this field")
 	parser.add_argument('--merge', '-m', metavar='MERGEKEY',
 		help="merge entries by this field")
-	args = parser.parse_args()
+	return parser.parse_args(argv)
+
+
+def main():
+	informats, outformats = formats()
+
+	args = parse_args()
 
 	if args.outformat is None and args.output is not None:
 		ext = args.output.split(os.path.extsep)[-1]
@@ -398,3 +404,7 @@ if __name__ == '__main__':
 	except Exception as e:
 		log.error(e)
 		sys.exit(1)
+
+
+if __name__ == '__main__':
+	main()
