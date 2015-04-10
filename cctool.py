@@ -31,10 +31,14 @@ import sys
 import argparse
 import logging as log
 from collections import OrderedDict
-from StringIO import StringIO
 from ConfigParser import RawConfigParser as ConfigParser
 import json
 from datetime import datetime
+
+try:
+	from StringIO import StringIO
+except ImportError:
+	from io import StringIO
 
 try:
 	import ldif
