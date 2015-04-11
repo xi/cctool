@@ -115,7 +115,7 @@ class MultiDict(OrderedDict):
 		elif default is not NOTSET:
 			return default
 		else:
-			raise KeyError
+			raise KeyError(key)
 
 	def join(self, key, default='', sep=u','):
 		if key in self:
@@ -123,8 +123,10 @@ class MultiDict(OrderedDict):
 				return self[key][0]
 			else:
 				return sep.join(self[key])
-		else:
+		elif default is not None:
 			return default
+		else:
+			raise KeyError(key)
 
 	def update(self, other):
 		for key in other:
