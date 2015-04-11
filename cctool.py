@@ -31,6 +31,8 @@
 # -	parse vcard name (N)
 # -	use mintained vcard/ical libs
 
+from __future__ import print_function
+
 import os
 import sys
 import argparse
@@ -47,13 +49,13 @@ except ImportError:
 
 try:
 	import ldif
-except ImportError as e:
-	ldif = e
+except ImportError as err:
+	ldif = err
 
 try:
 	import vobject
-except ImportError as e:
-	vobject = e
+except ImportError as err:
+	vobject = err
 
 
 NOTSET = object()
@@ -224,12 +226,12 @@ class ABook(Format):
 
 	@classmethod
 	def load(cls, fh):
-		cp = ConfigParser()
-		cp.readfp(fh)
-		for section in cp.sections():
+		config_parser = ConfigParser()
+		config_parser.readfp(fh)
+		for section in config_parser.sections():
 			if section != u'format':
 				d = MultiDict()
-				for key, value in cp.items(section):
+				for key, value in config_parser.items(section):
 					if key == 'bday':
 						if value[0] == '-':
 							value = '1900' + value[1:]
@@ -284,9 +286,9 @@ class LDIF(Format):
 		parser = LDIFParser(fh)
 		try:
 			parser.parse()
-		except ValueError as e:
-			log.warning("ValueError after reading %i records: %s"
-				% (parser.records_read, e))
+		except ValueError as err:
+			log.warning("ValueError after reading %i records: %s",
+				parser.records_read, err)
 		for entry in parser.entries.itervalues():
 			yield MultiDict(entry)
 
@@ -409,19 +411,19 @@ def main():
 	outformat = get_outformat(args)
 
 	data = []
-	for fn in args.input:
+	for filename in args.input:
 		if args.informat is not None:
 			informat = args.informat
 		else:
-			informat = get_informat(fn)
+			informat = get_informat(filename)
 
-		infile = sys.stdin if fn == '-' else open(fn)
+		infile = sys.stdin if filename == '-' else open(filename)
 		try:
 			data += informats[informat]().load(infile)
-		except Exception as e:
-			log.error(e)
+		except Exception as err:
+			log.error(err)
 			sys.exit(1)
-		if fn != '-':
+		if filename != '-':
 			infile.close()
 
 	if args.merge is not None:
@@ -433,8 +435,8 @@ def main():
 	outfile = sys.stdout if args.output is None else open(args.output, 'w')
 	try:
 		outformats[outformat]().dump(data, outfile)
-	except Exception as e:
-		log.error(e)
+	except Exception as err:
+		log.error(err)
 		sys.exit(1)
 
 
