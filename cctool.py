@@ -316,6 +316,17 @@ class VCard(Format):
 			yield d
 
 	@classmethod
+	def _dump_field(cls, key, item, vcard):
+		if key == 'name':
+			vcard.add('fn').value = item.join(key)
+		elif key == 'nick':
+			for value in item[key]:
+				vcard.add('nickname').value = value
+		elif key in cls.fields:
+			for value in item[key]:
+				vcard.add(key).value = value
+
+	@classmethod
 	def dump(cls, data, fh):
 		if isinstance(vobject, Exception):
 			raise vobject
@@ -324,14 +335,7 @@ class VCard(Format):
 			vcard = vobject.vCard()
 			vcard.add('n').value = ''
 			for key in item:
-				if key == 'name':
-					vcard.add('fn').value = item.join(key)
-				elif key == 'nick':
-					for value in item[key]:
-						vcard.add('nickname').value = value
-				elif key in cls.fields:
-					for value in item[key]:
-						vcard.add(key).value = value
+				cls._dump_field(key, item, vcard)
 			vcard.serialize(fh)
 
 
@@ -370,32 +374,46 @@ def parse_args(argv=None):
 	return parser.parse_args(argv)
 
 
-def main():
+def get_outformat(args):
 	informats, outformats = formats()
 
-	args = parse_args()
-
-	if args.outformat is None and args.output is not None:
+	if args.outformat is not None:
+		return args.outformat
+	elif args.output is not None:
 		ext = args.output.split(os.path.extsep)[-1]
 		if ext in outformats:
-			args.outformat = ext
-	if args.outformat is None:
-		print("Missing output format")
+			return ext
+
+	print("Missing output format")
+	sys.exit(1)
+
+
+def get_informat(filename):
+	informats, outformats = formats()
+	ext = filename.split(os.path.extsep)[-1]
+
+	if ext in informats:
+		return ext
+	else:
+		print("Missing input format")
 		sys.exit(1)
+
+
+def main():
+	informats, outformats = formats()
+	args = parse_args()
 
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 
+	outformat = get_outformat(args)
+
 	data = []
 	for fn in args.input:
-		ext = fn.split(os.path.extsep)[-1]
 		if args.informat is not None:
 			informat = args.informat
-		elif ext in informats:
-			informat = ext
 		else:
-			print("Missing input format")
-			sys.exit(1)
+			informat = get_informat(fn)
 
 		infile = sys.stdin if fn == '-' else open(fn)
 		try:
@@ -414,7 +432,7 @@ def main():
 
 	outfile = sys.stdout if args.output is None else open(args.output, 'w')
 	try:
-		outformats[args.outformat]().dump(data, outfile)
+		outformats[outformat]().dump(data, outfile)
 	except Exception as e:
 		log.error(e)
 		sys.exit(1)
