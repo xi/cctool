@@ -111,10 +111,13 @@ class MultiDict(OrderedDict):
 			raise KeyError
 
 	def join(self, key, default='', sep=u','):
-		if key in self and len(self[key]) == 1:
-			return self[key][0]
+		if key in self:
+			if len(self[key]) == 1:
+				return self[key][0]
+			else:
+				return sep.join(self[key])
 		else:
-			return sep.join(self[key])
+			return default
 
 	def update(self, other):
 		for key in other:
