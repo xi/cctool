@@ -122,6 +122,7 @@ class MultiDict(OrderedDict):
 
 
 def merged(data, key):
+	"""Outer join `data` on `key`."""
 	tmp = dict()
 	missing = []
 	for entry in data:
