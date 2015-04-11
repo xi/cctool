@@ -15,7 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""A tool for managing contacts and calendars."""
+"""A tool for managing contacts and calendars.
+
+cctool can read entries from different source formats and output them to
+different target formats. For example, it could be used to combine birthday
+dates from an addressbook and a calendar.
+"""
 
 # internal representation: iterable of dicts with unsepcified format.
 # interpretation of different keys and values happens at dump
