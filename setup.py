@@ -10,6 +10,11 @@ setup(
     author_email='tobias.bengfort@gmx.net',
     platforms='any',
     py_modules=['cctool'],
+    extras_require={
+        'ldif': ['python-ldap'],
+        'ical': ['vobject'],
+        'vcard': ['vobject'],
+    },
     license='GPLv3+',
     entry_points={'console_scripts': 'cctool=cctool:main'},
     classifiers=[
