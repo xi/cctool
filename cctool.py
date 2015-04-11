@@ -255,13 +255,14 @@ class ABook(Format):
 		cp.write(fh)
 
 
-class LDIFParser(ldif.LDIFParser):
-	def __init__(self, fh):
-		ldif.LDIFParser.__init__(self, fh)
-		self.entries = {}
+if not isinstance(ldif, Exception):
+	class LDIFParser(ldif.LDIFParser):
+		def __init__(self, fh):
+			ldif.LDIFParser.__init__(self, fh)
+			self.entries = {}
 
-	def handle(self, dn, entry):
-		self.entries[dn] = entry
+		def handle(self, dn, entry):
+			self.entries[dn] = entry
 
 
 class LDIF(Format):
