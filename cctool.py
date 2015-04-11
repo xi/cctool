@@ -23,7 +23,6 @@
 # TODO
 # -	type conversion (especially dates)
 # -	filter/convert for valid fields
-# -	tests
 # -	filter
 # -	merge when keys intercept (not necesserily equal)
 # -	abook needs no spaces between =
