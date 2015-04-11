@@ -291,7 +291,7 @@ class LDIF(Format):
 			yield MultiDict(entry)
 
 	@classmethod
-	def dump(cls, fh):
+	def dump(cls, data, fh):
 		if isinstance(ldif, Exception):
 			raise ldif
 		raise NotImplementedError
@@ -412,7 +412,7 @@ def main():
 	if args.sort is not None:
 		data = sorted(data, key=lambda x: x[args.sort])
 
-	outfile = sys.stdout if args.output is None else open(args.output)
+	outfile = sys.stdout if args.output is None else open(args.output, 'w')
 	try:
 		outformats[args.outformat]().dump(data, outfile)
 	except Exception as e:
