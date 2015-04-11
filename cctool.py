@@ -90,13 +90,19 @@ class MultiDict(OrderedDict):
 	>>> d['foo'] = []
 	>>> 'foo' in d
 	False
-	>>> d['foo'] = [1, 2, 3]
+	>>> d['foo'] = ['a', 'b', 'c']
 	>>> 'foo' in d
 	True
 	>>> d['foo']
-	[1, 2, 3]
+	['a', 'b', 'c']
 	>>> d.first('foo')
-	1
+	'a'
+	>>> d.join('foo')
+	'a,b,c'
+	>>> d.join('foo', sep=', ')
+	'a, b, c'
+	>>> d.join('bar', default='N/A')
+	'N/A'
 	"""
 
 	def __contains__(self, key):
@@ -117,7 +123,7 @@ class MultiDict(OrderedDict):
 		else:
 			raise KeyError(key)
 
-	def join(self, key, default='', sep=u','):
+	def join(self, key, default='', sep=','):
 		if key in self:
 			if len(self[key]) == 1:
 				return self[key][0]
