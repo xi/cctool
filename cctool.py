@@ -25,6 +25,11 @@
 # -	filter/convert for valid fields
 # -	tests
 # -	filter
+# -	merge when keys intercept (not necesserily equal)
+# -	abook needs no spaces between =
+# -	read bsdcal (otherwise its rather pointless)
+# -	parse vcard name (N)
+# -	use mintained vcard/ical libs
 
 import os
 import sys
