@@ -42,7 +42,6 @@ import sys
 import argparse
 import logging as log
 from collections import OrderedDict
-from ConfigParser import RawConfigParser as ConfigParser
 import json
 from datetime import datetime
 
@@ -50,6 +49,11 @@ try:
 	from StringIO import StringIO
 except ImportError:
 	from io import StringIO
+
+try:
+	from ConfigParser import RawConfigParser as ConfigParser
+except ImportError:
+	from configparser import RawConfigParser as ConfigParser
 
 try:
 	import ldif
@@ -156,7 +160,7 @@ def merged(data, key):
 				tmp[tmp_key] = entry
 		else:
 			missing.append(entry)
-	return tmp.values() + missing
+	return list(tmp.values()) + missing
 
 
 class Format(object):
@@ -257,7 +261,7 @@ class ABook(Format):
 		cp = ConfigParser()
 		i = 0
 		for item in data:
-			section = unicode(i)
+			section = str(i)
 			cp.add_section(section)
 			for key in item:
 				if key == 'bday':
@@ -417,7 +421,6 @@ def main():
 	informats, outformats = formats()
 	args = parse_args()
 
-	reload(sys)
 	sys.setdefaultencoding('utf-8')
 
 	outformat = get_outformat(args)
