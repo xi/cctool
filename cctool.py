@@ -25,16 +25,6 @@ dates from an addressbook and a calendar.
 # internal representation: iterable of dicts with unsepcified format.
 # interpretation of different keys and values happens at dump
 
-# TODO
-# -	type conversion (especially dates)
-# -	filter/convert for valid fields
-# -	filter
-# -	merge when keys intercept (not necesserily equal)
-# -	abook needs no spaces between =
-# -	read bsdcal (otherwise its rather pointless)
-# -	parse vcard name (N)
-# -	use mintained vcard/ical libs
-
 from __future__ import print_function
 
 import os
