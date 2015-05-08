@@ -345,7 +345,7 @@ class LDIF(Format):
 
 class DateTimeJSONEncoder(json.JSONEncoder):
 	def default(self, obj):
-		if isinstance(obj, datetime):
+		if hasattr(obj, 'isoformat'):
 			return obj.isoformat()
 		else:
 			return super(DateTimeJSONEncoder, self).default(obj)
