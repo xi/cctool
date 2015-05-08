@@ -13,6 +13,7 @@ setup(
     extras_require={
         'ldif': ['python-ldap'],
         'ical': ['icaledar'],
+        'yaml': ['PyYAML'],
     },
     license='GPLv3+',
     entry_points={'console_scripts': 'cctool=cctool:main'},

@@ -53,6 +53,11 @@ try:
 except ImportError as err:
 	icalendar = err
 
+try:
+	import yaml
+except ImportError as err:
+	yaml = err
+
 
 NOTSET = object()
 
@@ -81,6 +86,9 @@ def formats():
 		outformats['ics'] = ICal
 	if not isinstance(ldif, Exception):
 		informats['ldif'] = LDIF
+	if not isinstance(yaml, Exception):
+		informats['yml'] = YAML
+		outformats['yml'] = YAML
 	return informats, outformats
 
 
@@ -373,6 +381,23 @@ class JSON(Format):
 	def dump(cls, data, fh):
 		_fh = codecs.getwriter('utf8')(fh)
 		json.dump(list(data), _fh, indent=4, cls=DateTimeJSONEncoder)
+
+
+class YAML(Format):
+	@classmethod
+	def load(cls, fh):
+		if isinstance(yaml, Exception):
+			raise yaml
+
+		return [MultiDict(d) for d in yaml.load(fh.read())]
+
+	@classmethod
+	def dump(cls, data, fh):
+		if isinstance(yaml, Exception):
+			raise yaml
+
+		_fh = codecs.getwriter('utf8')(fh)
+		_fh.write(yaml.safe_dump([dict(d) for d in data]))
 
 
 class Pickle(Format):

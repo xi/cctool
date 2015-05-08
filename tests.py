@@ -143,6 +143,13 @@ class TestPickle(_TestFormat):
 		pass
 
 
+@unittest.skipIf(isinstance(cctool.yaml, Exception), 'yaml not available')
+class TestYAML(_TestFormat):
+	def setUp(self):
+		self.format = cctool.YAML()
+		self.text = b'- name: [foo]\n'
+
+
 class TestArgs(unittest.TestCase):
 	def test_args(self):
 		args = cctool.parse_args(['-f', 'abook', '-t', 'bsdcal'])
