@@ -34,6 +34,7 @@ import logging as log
 from collections import OrderedDict
 import json
 from datetime import datetime
+import pickle
 
 try:
 	from StringIO import StringIO
@@ -63,11 +64,13 @@ def formats():
 	informats = {
 		'abook': ABook,
 		'json': JSON,
+		'pickle': Pickle,
 	}
 	outformats = {
 		'bsdcal': BSDCal,
 		'abook': ABook,
 		'json': JSON,
+		'pickle': Pickle,
 	}
 	if not isinstance(vobject, Exception):
 		informats['ics'] = ICal
@@ -319,6 +322,16 @@ class JSON(Format):
 	@classmethod
 	def dump(cls, data, fh):
 		json.dump(list(data), fh, indent=4, cls=DateTimeJSONEncoder)
+
+
+class Pickle(Format):
+	@classmethod
+	def load(cls, fh):
+		return pickle.load(fh)
+
+	@classmethod
+	def dump(cls, data, fh):
+		pickle.dump(data, fh)
 
 
 def parse_args(argv=None):

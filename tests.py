@@ -125,6 +125,12 @@ class TestJSON(_TestFormat):
 		self.text = '[\n    {\n        "name": [\n            "foo"\n        ]\n    }\n]'
 
 
+class TestPickle(_TestFormat):
+	def setUp(self):
+		self.format = cctool.Pickle()
+		self.text = '(lp0\nccctool\nMultiDict\np1\n((lp2\n(lp3\nS\'name\'\np4\na(lp5\nS\'foo\'\np6\naaatp7\nRp8\na.'
+
+
 class TestArgs(unittest.TestCase):
 	def test_args(self):
 		args = cctool.parse_args(['-f', 'abook', '-t', 'bsdcal'])
