@@ -498,13 +498,17 @@ def get_outformat(args):
 
 def get_informat(filename):
 	informats, outformats = formats()
-	ext = filename.split(os.path.extsep)[-1]
 
+	parts = filename.split(':', -1)
+	if len(parts) == 2 and parts[1] in informats:
+		return parts[1], parts[0]
+
+	ext = filename.split(os.path.extsep)[-1]
 	if ext in informats:
-		return ext
-	else:
-		print('Missing input format')
-		sys.exit(1)
+		return ext, filename
+
+	print('Missing input format')
+	sys.exit(1)
 
 
 def main():
@@ -518,7 +522,7 @@ def main():
 		if args.informat is not None:
 			informat = args.informat
 		else:
-			informat = get_informat(filename)
+			informat, filename = get_informat(filename)
 
 		infile = sys.stdin if filename == '-' else open(filename, 'rb')
 		data += informats[informat]().load(infile)
