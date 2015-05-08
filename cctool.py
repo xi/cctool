@@ -34,6 +34,7 @@ In addition, each item may have the generic fields 'tag', 'comment', and 'url'.
 """
 
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from collections import OrderedDict
 from datetime import date
@@ -237,7 +238,7 @@ class BSDCal(Format):
 	def dump(cls, data, fh):
 		_fh = codecs.getwriter('utf8')(fh)
 		for item in data:
-			if u'dtstart' in item and u'summary' in item:
+			if 'dtstart' in item and 'summary' in item:
 				dt = item.first('dtstart')
 				if 'yearly' in item['freq']:
 					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('summary')))
@@ -358,7 +359,7 @@ class ABook(Format):
 		config_parser = ConfigParser()
 		config_parser.readfp(_fh)
 		for section in config_parser.sections():
-			if section != u'format':
+			if section != 'format':
 				d = MultiDict()
 				for key, value in config_parser.items(section):
 					if key == 'bday':
@@ -366,7 +367,7 @@ class ABook(Format):
 							value = '1900' + value[1:]
 						d[key] = [datetime.strptime(value, '%Y-%m-%d')]
 					else:
-						d[key] = value.split(u',')
+						d[key] = value.split(',')
 				yield map_keys(d, cls.fields)
 
 	@classmethod
