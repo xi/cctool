@@ -13,7 +13,6 @@ setup(
     extras_require={
         'ldif': ['python-ldap'],
         'ical': ['vobject'],
-        'vcard': ['vobject'],
     },
     license='GPLv3+',
     entry_points={'console_scripts': 'cctool=cctool:main'},

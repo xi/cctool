@@ -119,19 +119,6 @@ class TestLDIF(_TestFormat):
 		pass
 
 
-@unittest.skipIf(isinstance(cctool.vobject, Exception), 'vobject not available')
-class TestVCard(_TestFormat):
-	def setUp(self):
-		self.format = cctool.VCard()
-		self.data = [cctool.MultiDict({
-			u'version': [u'4.0'],
-			u'fn': [u'Forrest Gump'],
-			u'email': [u'forrestgump@example.com'],
-			u'rev': [u'20080424T195243Z'],
-		})]
-		self.text = 'BEGIN:VCARD\nVERSION:4.0\nFN:Forrest Gump\nEMAIL:forrestgump@example.com\nREV:20080424T195243Z\nEND:VCARD'
-
-
 class TestJSON(_TestFormat):
 	def setUp(self):
 		self.format = cctool.JSON()

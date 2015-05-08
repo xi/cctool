@@ -72,8 +72,6 @@ def formats():
 	if not isinstance(vobject, Exception):
 		informats['ics'] = ICal
 		outformats['ics'] = ICal
-		informats['vcf'] = VCard
-		outformats['vcf'] = VCard
 	if not isinstance(ldif, Exception):
 		informats['ldif'] = LDIF
 	return informats, outformats
@@ -303,48 +301,6 @@ class LDIF(Format):
 		if isinstance(ldif, Exception):
 			raise ldif
 		raise NotImplementedError
-
-
-class VCard(Format):
-	fields = ['fn', 'n', 'nickname', 'photo', 'bday', 'anniversary', 'gender',
-		'adr', 'tel', 'email', 'impp', 'lang', 'tz', 'geo', 'title', 'role',
-		'logo', 'org', 'member', 'related', 'categories', 'note', 'prodid', 'rev',
-		'sound', 'uid', 'clientpidmap', 'url', 'version', 'key', 'fburl',
-		'caladruri', 'caluri']
-
-	@classmethod
-	def load(cls, fh):
-		if isinstance(vobject, Exception):
-			raise vobject
-
-		for vcard in vobject.readComponents(fh):
-			d = MultiDict()
-			for key, value in vcard.contents.iteritems():
-				d[key] = [i.value for i in value]
-			yield d
-
-	@classmethod
-	def _dump_field(cls, key, item, vcard):
-		if key == 'name':
-			vcard.add('fn').value = item.join(key)
-		elif key == 'nick':
-			for value in item[key]:
-				vcard.add('nickname').value = value
-		elif key in cls.fields:
-			for value in item[key]:
-				vcard.add(key).value = value
-
-	@classmethod
-	def dump(cls, data, fh):
-		if isinstance(vobject, Exception):
-			raise vobject
-
-		for item in data:
-			vcard = vobject.vCard()
-			vcard.add('n').value = ''
-			for key in item:
-				cls._dump_field(key, item, vcard)
-			vcard.serialize(fh)
 
 
 class DateTimeJSONEncoder(json.JSONEncoder):
