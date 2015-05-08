@@ -372,13 +372,22 @@ class ABook(Format):
 
 	@classmethod
 	def dump(cls, data, fh):
-		_fh = codecs.getwriter('utf8')(fh)
 		cp = ConfigParser()
-		i = 0
-		for _item in data:
+
+		if isinstance(cp.__module__, bytes):
+			_fh = fh
+			encode = lambda x: x.encode('utf8')
+		else:
+			_fh = codecs.getwriter('utf8')(fh)
+			encode = lambda x: x
+
+		def _set(cp, section, key, value):
+			cp.set(encode(section), encode(key), encode(value))
+
+		for i, _item in enumerate(data):
 			item = map_keys(_item, cls.fields, reverse=True)
 			section = _str(i)
-			cp.add_section(section)
+			cp.add_section(encode(section))
 			for key in item:
 				if key == 'bday':
 					dt = item.first(key)
@@ -386,14 +395,9 @@ class ABook(Format):
 						value = dt.strftime('--%m-%d')
 					else:
 						value = dt.strftime('%Y-%m-%d')
-					cp.set(section, key, value)
+					_set(cp, section, key, value)
 				elif key in cls.fields:
-					cp.set(section, key, item.join(key))
-				elif key in ['mail']:
-					cp.set(section, 'email', item.join(key))
-				elif key in ['cn']:
-					cp.set(section, 'name', item.join(key))
-			i += 1
+					_set(cp, section, key, item.join(key))
 		cp.write(_fh)
 
 
