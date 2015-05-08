@@ -447,11 +447,7 @@ def main():
 			informat = get_informat(filename)
 
 		infile = sys.stdin if filename == '-' else open(filename, 'rb')
-		try:
-			data += informats[informat]().load(infile)
-		except Exception as err:
-			log.error(err)
-			sys.exit(1)
+		data += informats[informat]().load(infile)
 		if filename != '-':
 			infile.close()
 
@@ -462,11 +458,7 @@ def main():
 		data = sorted(data, key=lambda x: x[args.sort])
 
 	outfile = sys.stdout if args.output is None else open(args.output, 'wb')
-	try:
-		outformats[outformat]().dump(data, outfile)
-	except Exception as err:
-		log.error(err)
-		sys.exit(1)
+	outformats[outformat]().dump(data, outfile)
 
 
 if __name__ == '__main__':
