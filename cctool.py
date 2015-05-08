@@ -29,6 +29,7 @@ from __future__ import print_function
 
 import os
 import sys
+import re
 import argparse
 import logging as log
 from collections import OrderedDict
@@ -74,6 +75,7 @@ def _str(x):
 
 def formats():
 	informats = {
+		'bsdcal': BSDCal,
 		'abook': ABook,
 		'json': JSON,
 		'pickle': Pickle,
@@ -239,6 +241,23 @@ class BSDCal(Format):
 					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('summary')))
 				elif dt.year == datetime.today().year:
 					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d'), item.join('summary')))
+
+	@classmethod
+	def load(cls, fh):
+		# Reads only a subset of bsdcal syntax!
+		year = datetime.today().year
+		for line in fh:
+			m = re.match(b'(\d\d)\/(\d\d)(\*?)\t(.*)', line.rstrip())
+			if m:
+				month, day, yearly, summary = m.groups()
+
+				mdict = MultiDict()
+				mdict['dtstart'] = [datetime(year, int(month), int(day))]
+				mdict['summary'] = [summary.decode('utf8')]
+				if yearly == b'*':
+					mdict['freq'] = ['yearly']
+
+				yield mdict
 
 
 class ICal(Format):

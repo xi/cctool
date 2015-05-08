@@ -81,13 +81,17 @@ class TestBSDCal(_TestFormat):
 	def setUp(self):
 		self.format = cctool.BSDCal()
 		self.data = [
-			cctool.MultiDict({'dtstart': [dt], 'summary': ['foo']}),
-			cctool.MultiDict({'bday': [dt], 'name': ['bar']}),
+			cctool.MultiDict([
+				('dtstart', [dt]),
+				('summary', [u'foo']),
+			]),
+			cctool.MultiDict([
+				('dtstart', [dt]),
+				('summary', [u'bar']),
+				('freq', ['yearly']),
+			]),
 		]
 		self.text = b'01/01\tfoo\n01/01*\tbar\n'
-
-	def test_load(self):
-		pass
 
 
 @unittest.skipIf(isinstance(cctool.icalendar, Exception), 'icalendar not available')
