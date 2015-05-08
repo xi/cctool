@@ -40,9 +40,9 @@ from datetime import date
 from datetime import datetime
 from io import BytesIO
 import argparse
+import base64
 import codecs
 import json
-import logging as log
 import os
 import pickle
 import re
@@ -52,11 +52,6 @@ try:
 	from ConfigParser import RawConfigParser as ConfigParser
 except ImportError:
 	from configparser import RawConfigParser as ConfigParser
-
-try:
-	import ldif
-except ImportError as err:
-	ldif = err
 
 try:
 	import icalendar
@@ -87,6 +82,7 @@ def formats():
 		'abook': ABook,
 		'json': JSON,
 		'pickle': Pickle,
+		'ldif': LDIF,
 	}
 	outformats = {
 		'bsdcal': BSDCal,
@@ -97,8 +93,6 @@ def formats():
 	if not isinstance(icalendar, Exception):
 		informats['ics'] = ICal
 		outformats['ics'] = ICal
-	if not isinstance(ldif, Exception):
-		informats['ldif'] = LDIF
 	if not isinstance(yaml, Exception):
 		informats['yml'] = YAML
 		outformats['yml'] = YAML
@@ -402,16 +396,6 @@ class ABook(Format):
 		cp.write(_fh)
 
 
-if not isinstance(ldif, Exception):
-	class LDIFParser(ldif.LDIFParser):
-		def __init__(self, fh):
-			ldif.LDIFParser.__init__(self, fh)
-			self.entries = {}
-
-		def handle(self, dn, entry):
-			self.entries[dn] = entry
-
-
 class LDIF(Format):
 	fields = {
 		'cn': 'name',
@@ -419,17 +403,35 @@ class LDIF(Format):
 	}
 
 	@classmethod
+	def get_blocks(cls, fh):
+		block = []
+		for _line in fh:
+			line = _line.rstrip()
+			if not line:
+				yield block
+				block = []
+			elif line.startswith(b'#'):
+				continue
+			elif line.startswith(b' '):
+				block[-1] += line[1:]
+			else:
+				block.append(line)
+		if block:
+			yield block
+
+	@classmethod
 	def load(cls, fh):
-		if isinstance(ldif, Exception):
-			raise ldif
-		parser = LDIFParser(fh)
-		try:
-			parser.parse()
-		except ValueError as err:
-			log.warning("ValueError after reading %i records: %s",
-				parser.records_read, err)
-		for entry in parser.entries.values():
-			yield map_keys(MultiDict(entry), cls.fields)
+		for block in cls.get_blocks(fh):
+			item = MultiDict()
+			for line in block:
+				m = re.match(b'([^:]*):(:?) *(.*)', line)
+				if m:
+					key, b64, value = m.groups()
+					if b64 == b':':
+						value = base64.decodestring(value)
+					item.append(key.decode('utf8'), [value.decode('utf8')])
+			if item:
+				yield map_keys(item, cls.fields)
 
 
 class DateTimeJSONEncoder(json.JSONEncoder):

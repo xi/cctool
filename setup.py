@@ -11,7 +11,6 @@ setup(
     platforms='any',
     py_modules=['cctool'],
     extras_require={
-        'ldif': ['python-ldap'],
         'ical': ['icaledar'],
         'yaml': ['PyYAML'],
     },

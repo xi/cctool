@@ -112,12 +112,14 @@ class TestABook(_TestFormat):
 		self.text = b'[0]\nname = foo\nbday = 1970-01-01\n\n'
 
 
-@unittest.skipIf(isinstance(cctool.ldif, Exception), 'ldif not available')
 class TestLDIF(_TestFormat):
 	def setUp(self):
 		self.format = cctool.LDIF()
-		self.data = [cctool.MultiDict({'dn': ['foo']})]
-		self.text = b'[0]\ndn = foo\n\n'
+		self.data = [cctool.MultiDict([
+			('name', ['foo']),
+			('email', ['foo@example.com']),
+		])]
+		self.text = b'cn: foo\nmail:: Zm9vQGV4YW1wbGUuY29t'
 
 	def test_dump(self):
 		pass
