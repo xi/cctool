@@ -338,7 +338,7 @@ if not isinstance(ldif, Exception):
 
 
 class LDIF(Format):
-	fields = ['dn', 'objeclass', 'modifytimestamp',
+	fields = ['dn', 'objectclass', 'modifytimestamp',
 		'mail', 'givenName', 'sn', 'cn']
 
 	@classmethod
