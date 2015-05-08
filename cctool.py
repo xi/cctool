@@ -60,6 +60,8 @@ except ImportError as err:
 
 
 NOTSET = object()
+PERSON = ['abook', 'ldif']
+EVENT = ['bsdcal', 'ics']
 
 
 def _str(x):
@@ -186,6 +188,13 @@ def map_keys(mdict, _map, reverse=False, exclusive=True):
 			outdict.append(key, mdict[key])
 
 	return outdict
+
+
+def event2person(source, reverse=False):
+	return map_keys(source, {
+		'summary': 'name',
+		'dtstart': 'bday',
+	}, reverse=reverse, exclusive=False)
 
 
 class Format(object):
@@ -492,6 +501,11 @@ def main():
 		data += informats[informat]().load(infile)
 		if filename != '-':
 			infile.close()
+
+	if outformat in PERSON:
+		data = [event2person(i) for i in data]
+	if outformat in EVENT:
+		data = [event2person(i, reverse=True) for i in data]
 
 	if args.merge is not None:
 		data = merged(data, key=args.merge)
