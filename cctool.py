@@ -173,6 +173,21 @@ def merged(data, key):
 	return list(tmp.values()) + missing
 
 
+def map_keys(mdict, _map, reverse=False, exclusive=True):
+	if reverse:
+		_map = dict((value, key) for key, value in _map.items())
+
+	outdict = MultiDict()
+
+	for key in mdict:
+		if key in _map:
+			outdict.append(_map[key], mdict[key])
+		elif not exclusive:
+			outdict.append(key, mdict[key])
+
+	return outdict
+
+
 class Format(object):
 	"""Baseclass with an API similar to the marshal, pickle and json modules.
 
@@ -214,13 +229,16 @@ class BSDCal(Format):
 
 
 class ICal(Format):
-	fields = ['attach', 'categories', 'class', 'comment', 'description', 'geo',
-		'location', 'percent-complete', 'priority', 'resources', 'status',
-		'summary', 'completed', 'dtend', 'due', 'dtstart', 'duration', 'freebusy',
-		'transp', 'tzid', 'tzname', 'tzoffsetfrom', 'tzoffsetto', 'tzurl',
-		'attendee', 'contact', 'organizer', 'recurrence-id', 'related-to', 'url',
-		'uid', 'exdate', 'rdate', 'rrule', 'action', 'repeat', 'trigger',
-		'created', 'dtstamp', 'last-modified', 'sequence']
+	fields = {
+		'categories': 'tag',
+		'comment': 'comment',
+		'description': 'description',
+		'location': 'location',
+		'summary': 'summary',
+		'dtend': 'dtend',
+		'dtstart': 'dtstart',
+		'url': 'url',
+	}
 
 	@classmethod
 	def _iter_events(cls, component):
@@ -264,7 +282,7 @@ class ICal(Format):
 					except ValueError:
 						break
 			else:
-				yield d
+				yield map_keys(d, cls.fields)
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -275,8 +293,9 @@ class ICal(Format):
 		calendar.add('prodid', '-//XI//NONSGML CCTOOL//')
 		calendar.add('version', '2.0')
 
-		for event in data:
+		for _event in data:
 			vevent = icalendar.Event()
+			event = map_keys(_event, cls.fields, reverse=True)
 			for key in event:
 				if key in cls.fields:
 					for value in event[key]:
@@ -287,10 +306,11 @@ class ICal(Format):
 
 
 class ABook(Format):
-	fields = ['name', 'nick', 'bday', 'email', 'url', 'tag',
+	fields = dict((x, x) for x in [
+		'name', 'nick', 'bday', 'email', 'url', 'tag',
 		'address_lines', 'city', 'state', 'zip', 'country',
 		'phone', 'workphone', 'mobile',
-		'xmpp', 'icq', 'msn', 'twitter', 'pgp']
+		'xmpp', 'icq', 'msn', 'twitter', 'pgp'])
 
 	@classmethod
 	def load(cls, fh):
@@ -307,14 +327,15 @@ class ABook(Format):
 						d[key] = [datetime.strptime(value, '%Y-%m-%d')]
 					else:
 						d[key] = value.split(u',')
-				yield d
+				yield map_keys(d, cls.fields)
 
 	@classmethod
 	def dump(cls, data, fh):
 		_fh = codecs.getwriter('utf8')(fh)
 		cp = ConfigParser()
 		i = 0
-		for item in data:
+		for _item in data:
+			item = map_keys(_item, cls.fields, reverse=True)
 			section = _str(i)
 			cp.add_section(section)
 			for key in item:
@@ -346,8 +367,10 @@ if not isinstance(ldif, Exception):
 
 
 class LDIF(Format):
-	fields = ['dn', 'objectclass', 'modifytimestamp',
-		'mail', 'givenName', 'sn', 'cn']
+	fields = {
+		'cn': 'name',
+		'mail': 'email',
+	}
 
 	@classmethod
 	def load(cls, fh):
@@ -360,7 +383,7 @@ class LDIF(Format):
 			log.warning("ValueError after reading %i records: %s",
 				parser.records_read, err)
 		for entry in parser.entries.values():
-			yield MultiDict(entry)
+			yield map_keys(MultiDict(entry), cls.fields)
 
 
 class DateTimeJSONEncoder(json.JSONEncoder):

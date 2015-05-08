@@ -94,8 +94,8 @@ class TestBSDCal(_TestFormat):
 class TestICal(_TestFormat):
 	def setUp(self):
 		self.format = cctool.ICal()
-		self.data = [cctool.MultiDict({u'uid': [u'20140519T210153Z-13022@tobias-eee']})]
-		self.text = b'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nUID:20140519T210153Z-13022@tobias-eee\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
+		self.data = [cctool.MultiDict({u'summary': [u'lorem ipsum']})]
+		self.text = b'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nSUMMARY:lorem ipsum\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
 
 
 class TestABook(_TestFormat):
