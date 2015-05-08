@@ -162,18 +162,15 @@ class MultiDict(OrderedDict):
 
 def merged(data, key):
 	"""Outer join `data` on `key`."""
-	tmp = dict()
-	missing = []
+	tmp = list()
 	for entry in data:
-		if key in entry:
-			tmp_key = str(entry[key])
-			if tmp_key in tmp:
-				tmp[tmp_key].update(entry)
-			else:
-				tmp[tmp_key] = entry
+		for other in tmp:
+			if not set(entry[key]).isdisjoint(other[key]):
+				other.update(entry)
+				break
 		else:
-			missing.append(entry)
-	return list(tmp.values()) + missing
+			tmp.append(entry)
+	return tmp
 
 
 def map_keys(mdict, _map, reverse=False, exclusive=True):
