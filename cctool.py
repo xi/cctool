@@ -33,6 +33,7 @@ import argparse
 import logging as log
 from collections import OrderedDict
 import json
+from datetime import date
 from datetime import datetime
 import pickle
 import codecs
@@ -191,10 +192,15 @@ def map_keys(mdict, _map, reverse=False, exclusive=True):
 
 
 def event2person(source, reverse=False):
-	return map_keys(source, {
+	target = map_keys(source, {
 		'summary': 'name',
 		'dtstart': 'bday',
 	}, reverse=reverse, exclusive=False)
+
+	if reverse and 'bday' in source:
+		target.append('freq', ['yearly'])
+
+	return target
 
 
 class Format(object):
@@ -230,11 +236,10 @@ class BSDCal(Format):
 		for item in data:
 			if u'dtstart' in item and u'summary' in item:
 				dt = item.first('dtstart')
-				if dt.year == datetime.today().year:
+				if 'yearly' in item['freq']:
+					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('summary')))
+				elif dt.year == datetime.today().year:
 					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d'), item.join('summary')))
-			if u'bday' in item and u'name' in item:
-				dt = item.first('bday')
-				_fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('name')))
 
 
 class ICal(Format):
@@ -247,6 +252,7 @@ class ICal(Format):
 		'dtend': 'dtend',
 		'dtstart': 'dtstart',
 		'url': 'url',
+		'freq': 'freq',
 	}
 
 	@classmethod
@@ -282,6 +288,8 @@ class ICal(Format):
 
 		for event in cls._iter_events(calendar):
 			d = MultiDict()
+			if 'RRULE' in event:
+				d['freq'] = [s.lower() for s in event['RRULE']['FREQ']]
 			for key, value in event.items():
 				if key.lower() in cls.fields:
 					try:
@@ -307,8 +315,11 @@ class ICal(Format):
 			event = map_keys(_event, cls.fields, reverse=True)
 			for key in event:
 				if key in cls.fields:
-					for value in event[key]:
-						vevent.add(key.upper(), value)
+					if key == 'freq':
+						vevent.add('RRULE', {'FREQ': event.first(key)})
+					else:
+						for value in event[key]:
+							vevent.add(key.upper(), value)
 			calendar.add_component(vevent)
 
 		fh.write(calendar.to_ical())
