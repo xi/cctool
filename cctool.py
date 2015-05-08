@@ -20,10 +20,18 @@
 cctool can read entries from different source formats and output them to
 different target formats. For example, it could be used to combine birthday
 dates from an addressbook and a calendar.
-"""
 
-# internal representation: iterable of dicts with unsepcified format.
-# interpretation of different keys and values happens at dump
+While each item is a generic MultiDict, there are typically two usecases:
+
+-	A *person* with the possible fields *'name', 'nick', 'bday', 'email',
+	'address_lines', 'city', 'state', 'zip', 'country', 'phone', 'workphone',
+	'mobile', 'xmpp', 'icq', 'msn', 'twitter', and 'pgp'.
+
+-	An *event* with the possible fields 'description', 'location', 'summary',
+	'dtend', 'dtstart', and 'freq'.
+
+In addition, each item may have the generic fields 'tag', 'comment', and 'url'.
+"""
 
 from __future__ import print_function
 
