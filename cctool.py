@@ -492,9 +492,9 @@ def parse_args(argv=None):
 	parser.add_argument('input', nargs='*', default=['-'], metavar='FILE')
 	parser.add_argument('--output', '-o', metavar='FILENAME')
 	parser.add_argument('--sort', '-s', metavar='SORTKEY',
-		help="sort entries by this field")
+		help='sort entries by this field')
 	parser.add_argument('--merge', '-m', metavar='MERGEKEY',
-		help="merge entries by this field")
+		help='merge entries by this field')
 	return parser.parse_args(argv)
 
 
@@ -508,7 +508,7 @@ def get_outformat(args):
 		if ext in outformats:
 			return ext
 
-	print("Missing output format")
+	print('Missing output format')
 	sys.exit(1)
 
 
@@ -519,7 +519,7 @@ def get_informat(filename):
 	if ext in informats:
 		return ext
 	else:
-		print("Missing input format")
+		print('Missing input format')
 		sys.exit(1)
 
 
