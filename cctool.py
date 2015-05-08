@@ -191,16 +191,18 @@ def map_keys(mdict, _map, reverse=False, exclusive=True):
 	return outdict
 
 
-def event2person(source, reverse=False):
-	target = map_keys(source, {
-		'summary': 'name',
-		'dtstart': 'bday',
-	}, reverse=reverse, exclusive=False)
+def event2person(data, reverse=False):
+	for source in data:
+		target = map_keys(source, {
+			'summary': 'name',
+			'dtstart': 'bday',
+		}, reverse=reverse, exclusive=False)
 
-	if reverse and 'bday' in source:
-		target.append('freq', ['yearly'])
+		if reverse and 'bday' in source:
+			target.append('freq', ['yearly'])
 
-	return target
+		if not reverse or 'dtstart' in target:
+			yield target
 
 
 class Format(object):
@@ -514,9 +516,9 @@ def main():
 			infile.close()
 
 	if outformat in PERSON:
-		data = [event2person(i) for i in data]
+		data = list(event2person(data))
 	if outformat in EVENT:
-		data = [event2person(i, reverse=True) for i in data]
+		data = list(event2person(data, reverse=True))
 
 	if args.merge is not None:
 		data = merged(data, key=args.merge)
