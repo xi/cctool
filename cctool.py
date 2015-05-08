@@ -137,9 +137,16 @@ class MultiDict(OrderedDict):
 		else:
 			raise KeyError(key)
 
+	def append(self, key, values):
+		"""Add a list of values."""
+		for value in values:
+			if value not in self[key]:
+				self[key] = self[key] + [value]
+
 	def update(self, other):
+		"""Update this MultiDict with the contentes of another one."""
 		for key in other:
-			self[key] = list(set(self[key] + other[key]))
+			self.append(key, other[key])
 
 
 def merged(data, key):
