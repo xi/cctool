@@ -84,7 +84,7 @@ class TestBSDCal(_TestFormat):
 			cctool.MultiDict({'dtstart': [dt], 'summary': ['foo']}),
 			cctool.MultiDict({'bday': [dt], 'name': ['bar']}),
 		]
-		self.text = '01/01\tfoo\n01/01*\tbar\n'
+		self.text = b'01/01\tfoo\n01/01*\tbar\n'
 
 	def test_load(self):
 		pass
@@ -95,7 +95,7 @@ class TestICal(_TestFormat):
 	def setUp(self):
 		self.format = cctool.ICal()
 		self.data = [cctool.MultiDict({u'uid': [u'20140519T210153Z-13022@tobias-eee']})]
-		self.text = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nUID:20140519T210153Z-13022@tobias-eee\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
+		self.text = b'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nUID:20140519T210153Z-13022@tobias-eee\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
 
 
 class TestABook(_TestFormat):
@@ -105,7 +105,7 @@ class TestABook(_TestFormat):
 			('name', ['foo']),
 			('bday', [datetime(1970, 1, 1)]),
 		])]
-		self.text = '[0]\nname = foo\nbday = 1970-01-01\n\n'
+		self.text = b'[0]\nname = foo\nbday = 1970-01-01\n\n'
 
 
 @unittest.skipIf(isinstance(cctool.ldif, Exception), 'ldif not available')
@@ -113,7 +113,7 @@ class TestLDIF(_TestFormat):
 	def setUp(self):
 		self.format = cctool.LDIF()
 		self.data = [cctool.MultiDict({'dn': ['foo']})]
-		self.text = '[0]\ndn = foo\n\n'
+		self.text = b'[0]\ndn = foo\n\n'
 
 	def test_dump(self):
 		pass
@@ -122,13 +122,25 @@ class TestLDIF(_TestFormat):
 class TestJSON(_TestFormat):
 	def setUp(self):
 		self.format = cctool.JSON()
-		self.text = '[\n    {\n        "name": [\n            "foo"\n        ]\n    }\n]'
+		self.text = b'[\n    {\n        "name": [\n            "foo"\n        ]\n    }\n]'
 
 
 class TestPickle(_TestFormat):
 	def setUp(self):
 		self.format = cctool.Pickle()
-		self.text = '(lp0\nccctool\nMultiDict\np1\n((lp2\n(lp3\nS\'name\'\np4\na(lp5\nS\'foo\'\np6\naaatp7\nRp8\na.'
+
+	# the serialization is different in py3, even with same protocol.
+	# so we only test that the data is not changes by encode/decode.
+	def test_combined(self):
+		tmp = self.format.dumps(self.data)
+		actual = self.format.loads(tmp)
+		self.assertEqual(list(actual), self.data)
+
+	def test_dump(self):
+		pass
+
+	def test_load(self):
+		pass
 
 
 class TestArgs(unittest.TestCase):

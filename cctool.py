@@ -35,11 +35,8 @@ from collections import OrderedDict
 import json
 from datetime import datetime
 import pickle
-
-try:
-	from StringIO import StringIO
-except ImportError:
-	from io import StringIO
+import codecs
+from io import BytesIO
 
 try:
 	from ConfigParser import RawConfigParser as ConfigParser
@@ -155,7 +152,11 @@ def merged(data, key):
 
 
 class Format(object):
-	"""Baseclass with an API similar to the marshal, pickle and json modules."""
+	"""Baseclass with an API similar to the marshal, pickle and json modules.
+
+	:py:meth:`load` takes a bytes stream and returns a :py:class:`MultiDict`.
+	:py:meth:`dump` does the reverse.
+	"""
 
 	@classmethod
 	def load(cls, fh):
@@ -163,7 +164,7 @@ class Format(object):
 
 	@classmethod
 	def loads(cls, s):
-		return cls.load(StringIO(s))
+		return cls.load(BytesIO(s))
 
 	@classmethod
 	def dump(cls, data, fh):
@@ -171,7 +172,7 @@ class Format(object):
 
 	@classmethod
 	def dumps(cls, data):
-		fh = StringIO()
+		fh = BytesIO()
 		cls.dump(data, fh)
 		return fh.getvalue()
 
@@ -179,14 +180,15 @@ class Format(object):
 class BSDCal(Format):
 	@classmethod
 	def dump(cls, data, fh):
+		_fh = codecs.getwriter('utf8')(fh)
 		for item in data:
 			if u'dtstart' in item and u'summary' in item:
 				dt = item.first('dtstart')
 				if dt.year == datetime.today().year:
-					fh.write('%s\t%s\n' % (dt.strftime('%m/%d'), item.join('summary')))
+					_fh.write('%s\t%s\n' % (dt.strftime('%m/%d'), item.join('summary')))
 			if u'bday' in item and u'name' in item:
 				dt = item.first('bday')
-				fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('name')))
+				_fh.write('%s\t%s\n' % (dt.strftime('%m/%d*'), item.join('name')))
 
 
 class ICal(Format):
@@ -270,8 +272,9 @@ class ABook(Format):
 
 	@classmethod
 	def load(cls, fh):
+		_fh = codecs.getreader('utf8')(fh)
 		config_parser = ConfigParser()
-		config_parser.readfp(fh)
+		config_parser.readfp(_fh)
 		for section in config_parser.sections():
 			if section != u'format':
 				d = MultiDict()
@@ -286,6 +289,7 @@ class ABook(Format):
 
 	@classmethod
 	def dump(cls, data, fh):
+		_fh = codecs.getwriter('utf8')(fh)
 		cp = ConfigParser()
 		i = 0
 		for item in data:
@@ -306,7 +310,7 @@ class ABook(Format):
 				elif key in ['cn']:
 					cp.set(section, 'name', item.join(key))
 			i += 1
-		cp.write(fh)
+		cp.write(_fh)
 
 
 if not isinstance(ldif, Exception):
@@ -354,11 +358,13 @@ class DateTimeJSONEncoder(json.JSONEncoder):
 class JSON(Format):
 	@classmethod
 	def load(cls, fh):
-		return [MultiDict(i) for i in json.load(fh)]
+		_fh = codecs.getreader('utf8')(fh)
+		return [MultiDict(i) for i in json.load(_fh)]
 
 	@classmethod
 	def dump(cls, data, fh):
-		json.dump(list(data), fh, indent=4, cls=DateTimeJSONEncoder)
+		_fh = codecs.getwriter('utf8')(fh)
+		json.dump(list(data), _fh, indent=4, cls=DateTimeJSONEncoder)
 
 
 class Pickle(Format):
@@ -417,8 +423,6 @@ def main():
 	informats, outformats = formats()
 	args = parse_args()
 
-	sys.setdefaultencoding('utf-8')
-
 	outformat = get_outformat(args)
 
 	data = []
@@ -428,7 +432,7 @@ def main():
 		else:
 			informat = get_informat(filename)
 
-		infile = sys.stdin if filename == '-' else open(filename)
+		infile = sys.stdin if filename == '-' else open(filename, 'rb')
 		try:
 			data += informats[informat]().load(infile)
 		except Exception as err:
@@ -443,7 +447,7 @@ def main():
 	if args.sort is not None:
 		data = sorted(data, key=lambda x: x[args.sort])
 
-	outfile = sys.stdout if args.output is None else open(args.output, 'w')
+	outfile = sys.stdout if args.output is None else open(args.output, 'wb')
 	try:
 		outformats[outformat]().dump(data, outfile)
 	except Exception as err:
