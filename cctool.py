@@ -354,12 +354,6 @@ class LDIF(Format):
 		for entry in parser.entries.values():
 			yield MultiDict(entry)
 
-	@classmethod
-	def dump(cls, data, fh):
-		if isinstance(ldif, Exception):
-			raise ldif
-		raise NotImplementedError
-
 
 class DateTimeJSONEncoder(json.JSONEncoder):
 	def default(self, obj):
