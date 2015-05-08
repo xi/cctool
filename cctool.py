@@ -49,19 +49,19 @@ import pickle
 import re
 import sys
 
-try:
+try:  # pragma: nocover
 	from ConfigParser import RawConfigParser as ConfigParser
-except ImportError:
+except ImportError:  # pragma: nocover
 	from configparser import RawConfigParser as ConfigParser
 
-try:
+try:  # pragma: nocover
 	import icalendar
-except ImportError as err:
+except ImportError as err:  # pragma: nocover
 	icalendar = err
 
-try:
+try:  # pragma: nocover
 	import yaml
-except ImportError as err:
+except ImportError as err:  # pragma: nocover
 	yaml = err
 
 
@@ -70,14 +70,14 @@ PERSON = ['abook', 'ldif']
 EVENT = ['bsdcal', 'ics']
 
 
-def _str(x):
+def _str(x):  # pragma: nocover
 	try:
 		return unicode(x)
 	except NameError:
 		return str(x)
 
 
-def formats():
+def formats():  # pragma: nocover
 	informats = {
 		'bsdcal': BSDCal,
 		'abook': ABook,
@@ -91,10 +91,10 @@ def formats():
 		'json': JSON,
 		'pickle': Pickle,
 	}
-	if not isinstance(icalendar, Exception):
+	if not isinstance(icalendar, Exception):  # pragma: nocover
 		informats['ics'] = ICal
 		outformats['ics'] = ICal
-	if not isinstance(yaml, Exception):
+	if not isinstance(yaml, Exception):  # pragma: nocover
 		informats['yml'] = YAML
 		outformats['yml'] = YAML
 	return informats, outformats
@@ -194,7 +194,7 @@ class Format(object):
 	"""
 
 	@classmethod
-	def load(cls, fh):
+	def load(cls, fh):  # pragma: nocover
 		raise NotImplementedError
 
 	@classmethod
@@ -202,7 +202,7 @@ class Format(object):
 		return cls.load(BytesIO(s))
 
 	@classmethod
-	def dump(cls, data, fh):
+	def dump(cls, data, fh):  # pragma: nocover
 		raise NotImplementedError
 
 	@classmethod
@@ -281,15 +281,13 @@ class ICal(Format):
 
 	@classmethod
 	def load(cls, fh):
-		if isinstance(icalendar, Exception):
+		if isinstance(icalendar, Exception):  # pragma: nocover
 			raise icalendar
 
 		calendar = icalendar.Calendar.from_ical(fh.read())
 
 		for event in cls._iter_events(calendar):
 			d = MultiDict()
-			if 'RRULE' in event:
-				d['freq'] = [s.lower() for s in event['RRULE']['FREQ']]
 			for key, value in event.items():
 				if key.lower() in cls.fields:
 					try:
@@ -299,11 +297,13 @@ class ICal(Format):
 					except ValueError:
 						break
 			else:
+				if 'RRULE' in event:
+					d['freq'] = [s.lower() for s in event['RRULE']['FREQ']]
 				yield map_keys(d, cls.fields)
 
 	@classmethod
 	def dump(cls, data, fh):
-		if isinstance(icalendar, Exception):
+		if isinstance(icalendar, Exception):  # pragma: nocover
 			raise icalendar
 
 		calendar = icalendar.Calendar()
@@ -353,10 +353,10 @@ class ABook(Format):
 	def dump(cls, data, fh):
 		cp = ConfigParser()
 
-		if isinstance(cp.__module__, bytes):
+		if isinstance(cp.__module__, bytes):  # pragma: nocover
 			_fh = fh
 			encode = lambda x: x.encode('utf8')
-		else:
+		else:  # pragma: nocover
 			_fh = codecs.getwriter('utf8')(fh)
 			encode = lambda x: x
 
@@ -441,14 +441,14 @@ class JSON(Format):
 class YAML(Format):
 	@classmethod
 	def load(cls, fh):
-		if isinstance(yaml, Exception):
+		if isinstance(yaml, Exception):  # pragma: nocover
 			raise yaml
 
 		return [MultiDict(d) for d in yaml.load(fh.read())]
 
 	@classmethod
 	def dump(cls, data, fh):
-		if isinstance(yaml, Exception):
+		if isinstance(yaml, Exception):  # pragma: nocover
 			raise yaml
 
 		_fh = codecs.getwriter('utf8')(fh)
@@ -511,7 +511,7 @@ def get_informat(filename):
 	sys.exit(1)
 
 
-def main():
+def main():  # pragma: nocover
 	informats, outformats = formats()
 	args = parse_args()
 
