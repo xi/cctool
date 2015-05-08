@@ -57,6 +57,13 @@ except ImportError as err:
 NOTSET = object()
 
 
+def _str(x):
+	try:
+		return unicode(x)
+	except NameError:
+		return str(x)
+
+
 def formats():
 	informats = {
 		'abook': ABook,
@@ -293,7 +300,7 @@ class ABook(Format):
 		cp = ConfigParser()
 		i = 0
 		for item in data:
-			section = str(i)
+			section = _str(i)
 			cp.add_section(section)
 			for key in item:
 				if key == 'bday':
@@ -337,7 +344,7 @@ class LDIF(Format):
 		except ValueError as err:
 			log.warning("ValueError after reading %i records: %s",
 				parser.records_read, err)
-		for entry in parser.entries.itervalues():
+		for entry in parser.entries.values():
 			yield MultiDict(entry)
 
 	@classmethod
@@ -381,9 +388,9 @@ def parse_args(argv=None):
 	informats, outformats = formats()
 
 	parser = argparse.ArgumentParser(description=__doc__)
-	parser.add_argument('--from', '-f', choices=informats.keys(),
+	parser.add_argument('--from', '-f', choices=list(informats.keys()),
 		metavar='FORMAT', dest='informat')
-	parser.add_argument('--to', '-t', choices=outformats.keys(),
+	parser.add_argument('--to', '-t', choices=list(outformats.keys()),
 		metavar='FORMAT', dest='outformat')
 	parser.add_argument('input', nargs='*', default=['-'], metavar='FILE')
 	parser.add_argument('--output', '-o', metavar='FILENAME')
