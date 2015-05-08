@@ -208,6 +208,21 @@ class ICal(Format):
 					yield event
 
 	@classmethod
+	def _decode(cls, key, value):
+		if isinstance(value, list):
+			return sum((cls._decode(key, i) for i in value), [])
+		else:
+			_value = value.from_ical(value)
+			if key in ['DTSTART', 'DTEND']:
+				if isinstance(_value, datetime) or isinstance(_value, date):
+					return [_value]
+				else:
+					raise ValueError(value)
+			else:
+				s = _str(_value)
+				return [s] if s else []
+
+	@classmethod
 	def load(cls, fh):
 		if isinstance(icalendar, Exception):
 			raise icalendar
@@ -218,8 +233,14 @@ class ICal(Format):
 			d = MultiDict()
 			for key, value in event.items():
 				if key.lower() in cls.fields:
-					d[key.lower()] = [value.from_ical(value)]
-			yield d
+					try:
+						_value = cls._decode(key, value)
+						if _value:
+							d[key.lower()] = _value
+					except ValueError:
+						break
+			else:
+				yield d
 
 	@classmethod
 	def dump(cls, data, fh):
