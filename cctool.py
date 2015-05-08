@@ -35,18 +35,18 @@ In addition, each item may have the generic fields 'tag', 'comment', and 'url'.
 
 from __future__ import print_function
 
-import os
-import sys
-import re
-import argparse
-import logging as log
 from collections import OrderedDict
-import json
 from datetime import date
 from datetime import datetime
-import pickle
-import codecs
 from io import BytesIO
+import argparse
+import codecs
+import json
+import logging as log
+import os
+import pickle
+import re
+import sys
 
 try:
 	from ConfigParser import RawConfigParser as ConfigParser
