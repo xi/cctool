@@ -90,12 +90,12 @@ class TestBSDCal(_TestFormat):
 		pass
 
 
-@unittest.skipIf(isinstance(cctool.vobject, Exception), 'vobject not available')
+@unittest.skipIf(isinstance(cctool.icalendar, Exception), 'icalendar not available')
 class TestICal(_TestFormat):
 	def setUp(self):
 		self.format = cctool.ICal()
 		self.data = [cctool.MultiDict({u'uid': [u'20140519T210153Z-13022@tobias-eee']})]
-		self.text = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//PYVOBJECT//NONSGML Version 1//EN\r\nBEGIN:VEVENT\r\nUID:20140519T210153Z-13022@tobias-eee\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
+		self.text = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nUID:20140519T210153Z-13022@tobias-eee\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
 
 
 class TestABook(_TestFormat):

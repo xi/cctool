@@ -52,9 +52,9 @@ except ImportError as err:
 	ldif = err
 
 try:
-	import vobject
+	import icalendar
 except ImportError as err:
-	vobject = err
+	icalendar = err
 
 
 NOTSET = object()
@@ -72,7 +72,7 @@ def formats():
 		'json': JSON,
 		'pickle': Pickle,
 	}
-	if not isinstance(vobject, Exception):
+	if not isinstance(icalendar, Exception):
 		informats['ics'] = ICal
 		outformats['ics'] = ICal
 	if not isinstance(ldif, Exception):
@@ -199,30 +199,46 @@ class ICal(Format):
 		'created', 'dtstamp', 'last-modified', 'sequence']
 
 	@classmethod
-	def load(cls, fh):
-		if isinstance(vobject, Exception):
-			raise vobject
+	def _iter_events(cls, component):
+		if isinstance(component, icalendar.Event):
+			yield component
+		elif hasattr(component, 'subcomponents'):
+			for c in component.subcomponents:
+				for event in cls._iter_events(c):
+					yield event
 
-		for calendar in vobject.readComponents(fh):
-			for event in calendar.vevent_list:
-				d = MultiDict()
-				for key, value in event.contents.iteritems():
-					d[key] = [i.value for i in value]
-				yield d
+	@classmethod
+	def load(cls, fh):
+		if isinstance(icalendar, Exception):
+			raise icalendar
+
+		calendar = icalendar.Calendar.from_ical(fh.read())
+
+		for event in cls._iter_events(calendar):
+			d = MultiDict()
+			for key, value in event.items():
+				if key.lower() in cls.fields:
+					d[key.lower()] = [value.from_ical(value)]
+			yield d
 
 	@classmethod
 	def dump(cls, data, fh):
-		if isinstance(vobject, Exception):
-			raise vobject
+		if isinstance(icalendar, Exception):
+			raise icalendar
 
-		ical = vobject.iCalendar()
+		calendar = icalendar.Calendar()
+		calendar.add('prodid', '-//XI//NONSGML CCTOOL//')
+		calendar.add('version', '2.0')
+
 		for event in data:
-			vevent = ical.add('vevent')
+			vevent = icalendar.Event()
 			for key in event:
 				if key in cls.fields:
 					for value in event[key]:
-						vevent.add(key).value = value
-		ical.serialize(fh)
+						vevent.add(key.upper(), value)
+			calendar.add_component(vevent)
+
+		fh.write(calendar.to_ical())
 
 
 class ABook(Format):
