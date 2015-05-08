@@ -101,28 +101,7 @@ def formats():
 
 
 class MultiDict(OrderedDict):
-	"""Dict subclass with multiple values for each key.
-
-	>>> d = MultiDict()
-	>>> d['foo']
-	[]
-	>>> d['foo'] = []
-	>>> 'foo' in d
-	False
-	>>> d['foo'] = ['a', 'b', 'c']
-	>>> 'foo' in d
-	True
-	>>> d['foo']
-	['a', 'b', 'c']
-	>>> d.first('foo')
-	'a'
-	>>> d.join('foo')
-	'a,b,c'
-	>>> d.join('foo', sep=', ')
-	'a, b, c'
-	>>> d.join('bar', default='N/A')
-	'N/A'
-	"""
+	"""Dict subclass with multiple values for each key."""
 
 	def __contains__(self, key):
 		return (super(MultiDict, self).__contains__(key)
