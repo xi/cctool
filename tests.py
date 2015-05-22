@@ -312,6 +312,7 @@ class TestABook(_TestFormat):
 		self.text = b'[0]\nname = foo\nbday = 1970-01-01\n\n'
 
 
+@unittest.skipIf(isinstance(cctool.ldif, Exception), 'ldif not available')
 class TestLDIF(_TestFormat):
 	def setUp(self):
 		self.format = cctool.LDIF()
@@ -323,24 +324,6 @@ class TestLDIF(_TestFormat):
 
 	def test_dump(self):
 		pass
-
-	def test_get_blocks(self):
-		fh = BytesIO(b'foo: bar\n  baz\n zz\n# second block\nencoded:: aHVodQ==\n\nfoo: bar')
-		blocks = list(self.format.get_blocks(fh))
-
-		self.assertEqual(blocks, [
-			[b'foo: bar bazzz', b'encoded:: aHVodQ=='],
-			[b'foo: bar'],
-		])
-
-	def test_get_blocks_w_trailing(self):
-		fh = BytesIO(b'foo: bar\n  baz\n zz\n# second block\nencoded:: aHVodQ==\n\nfoo: bar\n\n')
-		blocks = list(self.format.get_blocks(fh))
-
-		self.assertEqual(blocks, [
-			[b'foo: bar bazzz', b'encoded:: aHVodQ=='],
-			[b'foo: bar'],
-		])
 
 
 class TestJSON(_TestFormat):
