@@ -23,12 +23,12 @@ dates from an addressbook and a calendar.
 
 While each item is a generic MultiDict, there are typically two usecases:
 
--	A *person* with the possible fields 'name', 'nick', 'bday', 'email',
-	'address_lines', 'city', 'state', 'zip', 'country', 'phone', 'workphone',
-	'mobile', 'xmpp', 'icq', 'msn', 'twitter', and 'pgp'.
+- A *person* with the possible fields 'name', 'nick', 'bday', 'email',
+  'address_lines', 'city', 'state', 'zip', 'country', 'phone', 'workphone',
+  'mobile', 'xmpp', 'icq', 'msn', 'twitter', and 'pgp'.
 
--	An *event* with the possible fields 'description', 'location', 'summary',
-	'dtend', 'dtstart', and 'freq'.
+- An *event* with the possible fields 'description', 'location', 'summary',
+  'dtend', 'dtstart', and 'freq'.
 
 In addition, each item may have the generic fields 'tag', 'comment', and 'url'.
 """
@@ -452,7 +452,8 @@ class Pickle(Format):
 def parse_args(argv=None):
 	informats, outformats = formats()
 
-	parser = argparse.ArgumentParser(description=__doc__)
+	parser = argparse.ArgumentParser(description=__doc__,
+		formatter_class=argparse.RawTextHelpFormatter)
 	parser.add_argument('--from', '-f', choices=list(informats.keys()),
 		metavar='FORMAT', dest='informat')
 	parser.add_argument('--to', '-t', choices=list(outformats.keys()),
