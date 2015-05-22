@@ -317,8 +317,8 @@ class TestLDIF(_TestFormat):
 	def setUp(self):
 		self.format = cctool.LDIF()
 		self.data = [cctool.MultiDict([
-			('email', ['foo@example.com']),
 			('name', ['foo']),
+			('email', ['foo@example.com']),
 		])]
 		self.text = b'cn: foo\nmail:: Zm9vQGV4YW1wbGUuY29t'
 
