@@ -23,7 +23,7 @@ dates from an addressbook and a calendar.
 
 While each item is a generic MultiDict, there are typically two usecases:
 
--	A *person* with the possible fields *'name', 'nick', 'bday', 'email',
+-	A *person* with the possible fields 'name', 'nick', 'bday', 'email',
 	'address_lines', 'city', 'state', 'zip', 'country', 'phone', 'workphone',
 	'mobile', 'xmpp', 'icq', 'msn', 'twitter', and 'pgp'.
 
