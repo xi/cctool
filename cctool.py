@@ -43,7 +43,6 @@ from io import BytesIO
 import argparse
 import codecs
 import json
-import logging as log
 import os
 import pickle
 import re
@@ -55,9 +54,9 @@ except ImportError:  # pragma: nocover
 	from configparser import RawConfigParser as ConfigParser
 
 try:  # pragma: nocover
-	import ldif
+	import ldif3
 except ImportError as err:  # pragma: nocover
-	ldif = err
+	ldif3 = err
 
 try:  # pragma: nocover
 	import icalendar
@@ -98,7 +97,7 @@ def formats():  # pragma: nocover
 	if not isinstance(icalendar, Exception):  # pragma: nocover
 		informats['ics'] = ICal
 		outformats['ics'] = ICal
-	if not isinstance(ldif, Exception):  # pragma: nocover
+	if not isinstance(ldif3, Exception):  # pragma: nocover
 		informats['ldif'] = LDIF
 	if not isinstance(yaml, Exception):  # pragma: nocover
 		informats['yml'] = YAML
@@ -386,16 +385,6 @@ class ABook(Format):
 		cp.write(_fh)
 
 
-if not isinstance(ldif, Exception):
-	class LDIFParser(ldif.LDIFParser):
-		def __init__(self, fh):
-			ldif.LDIFParser.__init__(self, fh)
-			self.entries = {}
-
-		def handle(self, dn, entry):
-			self.entries[dn] = entry
-
-
 class LDIF(Format):
 	fields = {
 		'cn': 'name',
@@ -404,15 +393,12 @@ class LDIF(Format):
 
 	@classmethod
 	def load(cls, fh):
-		if isinstance(ldif, Exception):
-			raise ldif
-		parser = LDIFParser(fh)
-		try:
-			parser.parse()
-		except ValueError as err:
-			log.warning("ValueError after reading %i records: %s",
-				parser.records_read, err)
-		for entry in parser.entries.values():
+		if isinstance(ldif3, Exception):
+			raise ldif3
+
+		parser = ldif3.LDIFParser(fh, strict=False)
+
+		for dn, changetype, entry in parser.parse():
 			yield map_keys(MultiDict(entry), cls.fields)
 
 
