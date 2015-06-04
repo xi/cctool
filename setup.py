@@ -12,7 +12,7 @@ setup(
     py_modules=['cctool'],
     extras_require={
         'ldif': ['python-ldap'],
-        'ical': ['icaledar'],
+        'ical': ['icalendar'],
         'yaml': ['PyYAML'],
     },
     license='GPLv3+',
