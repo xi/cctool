@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='cctool',
-    version='0.1.0',
+    version='0.1.1',
     description="A tool for managing contacts and calendars.",
     author='Tobias Bengfort',
     author_email='tobias.bengfort@gmx.net',
