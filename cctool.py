@@ -398,7 +398,7 @@ class LDIF(Format):
 
 		parser = ldif3.LDIFParser(fh, strict=False)
 
-		for dn, changetype, entry in parser.parse():
+		for dn, entry in parser.parse():
 			yield map_keys(MultiDict(entry), cls.fields)
 
 

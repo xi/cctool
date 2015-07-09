@@ -11,7 +11,7 @@ setup(
     platforms='any',
     py_modules=['cctool'],
     extras_require={
-        'ldif': ['ldif3'],
+        'ldif': ['ldif3>=1.1.0'],
         'ical': ['icalendar'],
         'yaml': ['PyYAML'],
     },
