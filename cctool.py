@@ -68,10 +68,11 @@ try:  # pragma: nocover
 except ImportError as err:  # pragma: nocover
 	yaml = err
 
-
 NOTSET = object()
 PERSON = ['abook', 'ldif']
 EVENT = ['bsdcal', 'ics']
+
+__version__ = '0.1.1'
 
 
 def _str(x):  # pragma: nocover
@@ -454,6 +455,7 @@ def parse_args(argv=None):
 
 	parser = argparse.ArgumentParser(description=__doc__,
 		formatter_class=argparse.RawTextHelpFormatter)
+	parser.add_argument('--version', '-V', action='version', version=__version__)
 	parser.add_argument('--from', '-f', choices=list(informats.keys()),
 		metavar='FORMAT', dest='informat')
 	parser.add_argument('--to', '-t', choices=list(outformats.keys()),

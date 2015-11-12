@@ -1,10 +1,19 @@
 #!/usr/bin/env python
 
+import os
+import re
 from setuptools import setup
+
+DIRNAME = os.path.abspath(os.path.dirname(__file__))
+rel = lambda *parts: os.path.abspath(os.path.join(DIRNAME, *parts))
+
+MAIN = open(rel('cctool.py')).read()
+VERSION = re.search("__version__ = '([^']+)'", MAIN).group(1)
+
 
 setup(
     name='cctool',
-    version='0.1.1',
+    version=VERSION,
     description="A tool for managing contacts and calendars.",
     author='Tobias Bengfort',
     author_email='tobias.bengfort@gmx.net',
