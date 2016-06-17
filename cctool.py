@@ -429,7 +429,7 @@ class YAML(Format):
 		if isinstance(yaml, Exception):  # pragma: nocover
 			raise yaml
 
-		return [MultiDict(d) for d in yaml.load(fh.read())]
+		return [MultiDict(d) for d in yaml.safe_load(fh.read())]
 
 	@classmethod
 	def dump(cls, data, fh):
