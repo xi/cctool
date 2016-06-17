@@ -6,7 +6,8 @@ from io import BytesIO
 
 import cctool
 
-dt = datetime(datetime.today().year, 1, 1)
+year = datetime.today().year
+dt = datetime(year, 1, 1)
 
 
 class TestMultiDict(unittest.TestCase):
@@ -299,7 +300,7 @@ class TestICal(_TestFormat):
 				('dtstart', [dt.date()]),
 			]),
 		]
-		self.text = b'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nSUMMARY:lorem ipsum\r\nDTSTART;VALUE=DATE-TIME:20150101T000000\r\nRRULE:FREQ=DAILY\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:lorem ipsum2\r\nSUMMARY:lorem ipsum3\r\nDTSTART;VALUE=DATE:20150101\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
+		self.text = ('BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//XI//NONSGML CCTOOL//\r\nBEGIN:VEVENT\r\nSUMMARY:lorem ipsum\r\nDTSTART;VALUE=DATE-TIME:%i0101T000000\r\nRRULE:FREQ=DAILY\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:lorem ipsum2\r\nSUMMARY:lorem ipsum3\r\nDTSTART;VALUE=DATE:%i0101\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n' % (year, year)).encode('utf8')
 
 
 class TestABook(_TestFormat):
