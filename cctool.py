@@ -110,8 +110,8 @@ class MultiDict(OrderedDict):
 	"""Dict subclass with multiple values for each key."""
 
 	def __contains__(self, key):
-		return (super(MultiDict, self).__contains__(key)
-			and super(MultiDict, self).__getitem__(key) != [])
+		return (super(MultiDict, self).__contains__(key) and
+			super(MultiDict, self).__getitem__(key) != [])
 
 	def __getitem__(self, key):
 		if key in self:
